@@ -10,6 +10,7 @@ const io = socketIo(server);
 const port = 3000;
 
 app.use(express.json());
+app.use(express.static('public'));
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))

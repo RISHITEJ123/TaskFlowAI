@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TaskFlowAI</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    #task-list { margin-top: 20px; }
+    #task-form { display: flex; gap: 10px; }
+    input, select, button { padding: 5px; }
+  </style>
+</head>
+<body>
+  <h1>TaskFlowAI</h1>
+  <div id="task-form">
+    <input id="title" placeholder="Task title" required>
+    <input id="description" placeholder="Description">
+    <select id="priority">
+      <option value="low">Low</option>
+      <option value="medium" selected>Medium</option>
+      <option value="high">High</option>
+    </select>
+    <button onclick="createTask()">Add Task</button>
+  </div>
+  <div id="task-list"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const taskList = document.getElementById('task-list');
+
+    // Load existing tasks
+    fetch('/tasks')
+      .then(res => res.json())
+      .then(tasks => tasks.forEach(addTaskToList));
+
+    // Listen for new tasks
+    socket.on('taskCreated', addTaskToList);
+
+    function addTaskToList(task) {
+      const div = document.createElement('div');
+      div.innerHTML = `<strong>${task.title}</strong> (${task.priority})<br>${task.description || ''}`;
+      taskList.appendChild(div);
+    }
+
+    function createTask() {
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const priority = document.getElementById('priority').value;
+
+      if (!title) return alert('Title is required');
+
+      fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, priority })
+      }).then(() => {
+        document.getElementById('title').value = '';
+        document.getElementById('description').value = '';
+      });
+    }
+  </script>
+</body>
+</html>
