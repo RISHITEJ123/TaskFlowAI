@@ -10,7 +10,6 @@ const io = socketIo(server);
 const port = 3000;
 
 app.use(express.json());
-app.use(express.static('public'));
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
@@ -27,7 +26,7 @@ app.post('/tasks', async (req, res) => {
   try {
     const task = new Task(req.body);
     await task.save();
-    io.emit('taskCreated', task);
+    io.emit('taskCreated', task); // Broadcast to all clients
     res.status(201).send(task);
   } catch (err) {
     res.status(400).send({ error: err.message });
